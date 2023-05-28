@@ -1,0 +1,10 @@
+{
+  "name": "KMB ETA",
+  "version": "0.1",
+  "description": "Quickly find the ETA of desired route",
+  "manifest_version": 3,
+  "action": {
+    "default_title": "KMB ETA",
+    "default_popup": "popup.html"
+  }
+}
