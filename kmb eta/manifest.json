@@ -1,7 +1,7 @@
 {
   "name": "香港九巴(KMB)巴士預計到站時間查詢小工具",
   "version": "1.01",
-  "description": "輸入路線並快速搜尋九巴巴士預計到站時間(非九巴官方應用程式)",
+  "description": "輸入九巴巴士號碼並快速搜尋預計到站時間(非九巴官方應用程式)",
   "manifest_version": 3,
   "icons": {
     "16": "./img/kmbeta.png",

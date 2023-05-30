@@ -189,7 +189,7 @@ const addEvent = () => {
       if (content.style.maxHeight) {
         content.style.maxHeight = null;
       } else {
-        content.style.maxHeight = content.scrollHeight + "px";
+        content.style.maxHeight = content.scrollHeight + 1 + "px";
       }
     });
   }

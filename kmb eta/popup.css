@@ -191,8 +191,7 @@
   background-color: red;
   top: 0px;
   bottom: 0px;
-  left: 40px;
-  margin-left: -10px;
+  left: 30px;
 }
 
 .content:last-of-type > .eta::after {
@@ -202,8 +201,7 @@
   background-color: white;
   top: 0px;
   bottom: 0px;
-  left: 40px;
-  margin-left: -10px;
+  left: 30px;
 }
 
 .timeline::after {
@@ -213,8 +211,7 @@
   background-color: red;
   top: 0px;
   bottom: 0px;
-  left: 40px;
-  margin-left: -10px;
+  left: 30px;
 }
 
 .timeline::before {
@@ -236,8 +233,7 @@
   background-color: red;
   top: 30px;
   bottom: 0px;
-  left: 40px;
-  margin-left: -10px;
+  left: 30px;
 }
 
 .timeline:last-of-type:after {
@@ -247,8 +243,7 @@
   background-color: red;
   top: 0px;
   bottom: 30px;
-  left: 40px;
-  margin-left: -10px;
+  left: 30px;
 }
 
 .blue {
