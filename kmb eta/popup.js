@@ -2,6 +2,8 @@
 let matchedRoute = [];
 //storge user selected route direction all stops infomation
 let selectedRouteStop = [];
+//storge kmb whole stop data
+let wholeStopsData = [];
 
 //shortcut for console log
 const print = (msg) => {
@@ -9,31 +11,43 @@ const print = (msg) => {
 };
 
 //fetch whole kmb route data and check is the inputed route from user exist or show no route found
-const getRouteInfo = async (input) => {
+const getRouteInfo = (input) => {
   //clear previousd Route first
   matchedRoute = [];
-  try {
-    let res = await fetch(`https://data.etabus.gov.hk/v1/transport/kmb/route/`);
-    let route = await res.json();
-    route = route.data;
-
-    route.forEach((routeInfo) => {
-      if (routeInfo.route === input) {
-        matchedRoute.push(routeInfo);
-      }
-    });
-
-    //if user entered correct route, display its direction and let user select
-    if (matchedRoute.length != 0) {
-      genRouteDirSelectBtn(matchedRoute);
-      document.querySelector("#status").innerText = `${input}號`;
-    } else {
-      //if user entered a route that cannot be found, return err msg
-      document.querySelector("#status").innerText = "查無此巴士號碼";
-    }
-  } catch (error) {
-    document.querySelector("#status").innerText = "請稍後嘗試";
+  // Show loading animation
+  document.querySelector("#loading").style.display = "flex";
+  if (Math.random() < 0.5) {
+    document.querySelector("#loading").style.transform += "rotateY(180deg)";
   }
+
+  setTimeout(async () => {
+    try {
+      let res = await fetch(
+        `https://data.etabus.gov.hk/v1/transport/kmb/route/`
+      );
+      let route = await res.json();
+      route = route.data;
+
+      route.forEach((routeInfo) => {
+        if (routeInfo.route === input) {
+          matchedRoute.push(routeInfo);
+        }
+      });
+
+      //if user entered correct route, display its direction and let user select
+      if (matchedRoute.length != 0) {
+        genRouteDirSelectBtn(matchedRoute);
+        document.querySelector("#status").innerText = `${input}號`;
+      } else {
+        //if user entered a route that cannot be found, return err msg
+        document.querySelector("#status").innerText = "查無此巴士號碼";
+      }
+    } catch (error) {
+      document.querySelector("#status").innerText = "請稍後嘗試";
+    } finally {
+      document.querySelector("#loading").style.display = "none";
+    }
+  }, 500);
 };
 
 //if the inputed route is correct, let user choose the direction of the route
@@ -41,7 +55,6 @@ const genRouteDirSelectBtn = (matchedRoute) => {
   let dirBtnHolder = document.querySelector(".routeDisplay");
 
   matchedRoute.forEach((routeInfo, index) => {
-    // dirBtnHolder.createElement("div");
     dirBtnHolder.innerHTML += `<button type="button" class="fetchedRouteBtn" value="${index}"><span>${routeInfo.orig_tc} 往 ${routeInfo.dest_tc}方向</span></button>`;
   });
 
@@ -70,44 +83,58 @@ const genRouteDirSelectBtn = (matchedRoute) => {
 
 //fetch stops data from user choosed route direction
 const getStopId = async (matchedRoute, selectedRouteIndex) => {
-  try {
-    selectedRouteStop = [];
-    let selectedDir = matchedRoute[selectedRouteIndex];
-    let dir = "";
-
-    if (selectedDir.bound === "O") {
-      dir = "outbound";
-    } else if (selectedDir.bound === "I") {
-      dir = "inbound";
-    }
-
-    let res = await fetch(
-      `https://data.etabus.gov.hk/v1/transport/kmb/route-stop/${selectedDir.route}/${dir}/${selectedDir.service_type}`
-    );
-    let allStops = await res.json();
-    allStops = allStops.data;
-
-    allStops.forEach((stopInfo) => {
-      selectedRouteStop.push(stopInfo);
-    });
-
-    await replaceStopName(selectedRouteStop);
-
-    await getETA(selectedDir, selectedRouteStop);
-  } catch (error) {
-    document.querySelector("#status").innerText = "請稍後嘗試";
+  // Show loading animation
+  document.querySelector("#loading").style.display = "flex";
+  if (Math.random() < 0.5) {
+    document.querySelector("#loading").style.transform += "rotateY(180deg)";
   }
+
+  setTimeout(async () => {
+    try {
+      selectedRouteStop = [];
+      let selectedDir = matchedRoute[selectedRouteIndex];
+      let dir = "";
+
+      if (selectedDir.bound === "O") {
+        dir = "outbound";
+      } else if (selectedDir.bound === "I") {
+        dir = "inbound";
+      }
+
+      let res = await fetch(
+        `https://data.etabus.gov.hk/v1/transport/kmb/route-stop/${selectedDir.route}/${dir}/${selectedDir.service_type}`
+      );
+
+      let allStops = await res.json();
+      allStops = allStops.data;
+
+      allStops.forEach((stopInfo) => {
+        selectedRouteStop.push(stopInfo);
+      });
+
+      await replaceStopName(selectedRouteStop);
+
+      await getETA(selectedDir, selectedRouteStop);
+    } catch (error) {
+      document.querySelector("#status").innerText = "請稍後嘗試";
+    } finally {
+      document.querySelector("#loading").style.display = "none";
+    }
+  }, 500);
+};
+
+const getStopsInfo = async () => {
+  let res = await fetch("https://data.etabus.gov.hk/v1/transport/kmb/stop");
+  wholeStopsData = await res.json();
+  wholeStopsData = wholeStopsData.data;
 };
 
 //replace stop id in user choosed route direction data with corresponding name from fetching whole kmb stop data(only this api have stop full name)
 const replaceStopName = async (selectedRouteAllStops) => {
-  //get whole stop info
+  if ((wholeStopsData = [])) {
+    await getStopsInfo();
+  }
 
-  let res = await fetch("https://data.etabus.gov.hk/v1/transport/kmb/stop");
-  let wholeStopsData = await res.json();
-  wholeStopsData = wholeStopsData.data;
-
-  //replace the selected route stop id with it corresponding name
   wholeStopsData.forEach((wholeStopsInfo) => {
     selectedRouteAllStops.forEach((selectedRouteStopsInfo) => {
       if (selectedRouteStopsInfo.stop === wholeStopsInfo.stop) {
