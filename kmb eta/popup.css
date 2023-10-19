@@ -84,7 +84,9 @@
   top: 100px;
 }
 
-.fetchedRouteBtn {
+.fetchedRouteBtn,
+.favBtn,
+.added {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -159,7 +161,7 @@
   font-size: 24px;
   position: absolute;
   right: 20px;
-  top: -25px;
+  top: -35%;
   transform: scaleX(1.2);
 }
 
@@ -261,4 +263,19 @@
   width: 300px;
   height: 300px;
   transform: translateY(34%);
+}
+.bin {
+  height: 20px;
+  width: 20px;
+  position: absolute;
+  background-color: white;
+}
+
+.favTitle {
+  display: none;
+}
+
+.grey {
+  background-color: grey;
+  border: grey;
 }
