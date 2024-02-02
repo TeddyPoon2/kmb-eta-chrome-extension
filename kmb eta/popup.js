@@ -5,42 +5,52 @@ let selectedRouteStop = [];
 //storge kmb whole stop data
 let wholeStopsData = [];
 //fave
-let storedRoute = localStorage.getItem("favRoute");
+let parsedStoredRoute = localStorage.getItem("favRoute");
 //shortcut for console log
 const print = (msg) => {
   console.log(msg);
 };
 
-if (!!storedRoute) {
-  document.querySelector(".favTitle").style.display = "block";
-  storedRoute = JSON.parse(storedRoute).sort((a, b) => a - b);
-  let dirBtnHolder = document.querySelector(".routeDisplay");
-  storedRoute.forEach((route) => {
+if (parsedStoredRoute) {
+  const favTitle = document.querySelector(".favTitle");
+  const routeDisplay = document.querySelector(".routeDisplay");
+
+  favTitle.style.display = "block";
+
+  const sortedParsedStoredRoute = JSON.parse(parsedStoredRoute).sort(
+    (a, b) => a - b
+  );
+
+  sortedParsedStoredRoute.forEach((route) => {
     const createDiv = document.createElement("div");
     createDiv.classList.add("favRoute");
-    createDiv.innerHTML = `<img class="bin" data-route="${route}" src="./img/MaterialSymbolsDeleteOutline.svg" /><button type="button" class="favBtn" value="${route}"><span>${route}</span></button>`;
-    dirBtnHolder.appendChild(createDiv);
+    createDiv.innerHTML = `
+      <img class="bin" data-route="${route}" src="./img/MaterialSymbolsDeleteOutline.svg" />
+      <button type="button" class="favBtn" value="${route}">
+        <span>${route}</span>
+      </button>
+    `;
+    routeDisplay.appendChild(createDiv);
   });
 
   Array.from(document.getElementsByClassName("favBtn")).forEach((nodeElm) => {
-    nodeElm.addEventListener("click", function (event) {
+    nodeElm.addEventListener("click", (event) => {
       event.preventDefault();
-      getRouteInfo(this.value.toUpperCase());
+      getRouteInfo(nodeElm.value.toUpperCase());
     });
   });
 
   Array.from(document.getElementsByClassName("bin")).forEach((nodeElm) => {
-    nodeElm.addEventListener("click", function (event) {
+    nodeElm.addEventListener("click", (event) => {
       event.preventDefault();
-      toggleFav(this.dataset.route);
-      this.parentElement.remove();
+      toggleFav(nodeElm.dataset.route);
+      nodeElm.parentElement.remove();
     });
   });
 }
 
-//fetch whole kmb route data and check is the inputed route from user exist or show no route found
+// fetch whole kmb route data and check is the inputed route from user exist or show no route found
 const getRouteInfo = (input) => {
-  //disable btn
   document.getElementById("inputBtn").disabled = true;
   //clear previousd Route first
   matchedRoute = [];
@@ -48,7 +58,7 @@ const getRouteInfo = (input) => {
   document.querySelector(".routeDisplay").innerHTML = "";
   document.querySelector(".stopDisplay").innerHTML = "";
   // Show loading animation
-  document.querySelector("#loading").style.display = "flex";
+  document.querySelector("#loading").style.display = "block";
   document.querySelector(".favTitle").style.display = "none";
 
   setTimeout(async () => {
@@ -57,9 +67,8 @@ const getRouteInfo = (input) => {
         `https://data.etabus.gov.hk/v1/transport/kmb/route/`
       );
       let route = await res.json();
-      route = route.data;
 
-      route.forEach((routeInfo) => {
+      route.data.forEach((routeInfo) => {
         if (routeInfo.route === input) {
           matchedRoute.push(routeInfo);
         }
@@ -88,14 +97,23 @@ const genRouteDirSelectBtn = (matchedRoute) => {
   let dirBtnHolder = document.querySelector(".routeDisplay");
 
   matchedRoute.forEach((routeInfo, index) => {
-    dirBtnHolder.innerHTML += `<button type="button" class="fetchedRouteBtn" value="${index}"><span>${routeInfo.orig_tc} 往 ${routeInfo.dest_tc}方向</span></button>`;
+    dirBtnHolder.innerHTML += `
+    <button type="button" class="fetchedRouteBtn" value="${index}">
+    <span>${routeInfo.orig_tc} 往 ${routeInfo.dest_tc}方向</span>
+    </button>`;
   });
   if (favRoute && favRoute.includes(matchedRoute[0].route)) {
-    dirBtnHolder.innerHTML += `<button type="button" class="added grey"><span>已加入至常用路線</span></button>`;
+    dirBtnHolder.innerHTML += `
+    <button type="button" class="added grey">
+    <span>已加入至常用路線</span>
+    </button>`;
     document.querySelector(".added").disabled = true;
     document.querySelector(".added").style.cursor = "not-allowed";
   } else {
-    dirBtnHolder.innerHTML += `<button type="button" class="favBtn" value="${matchedRoute[0].route}"><span>加入${matchedRoute[0].route}號至常用路線</span></button>`;
+    dirBtnHolder.innerHTML += `
+    <button type="button" class="favBtn" value="${matchedRoute[0].route}">
+    <span>加入${matchedRoute[0].route}號至常用路線</span>
+    </button>`;
   }
 
   //add button onclick event, let user select route direction
@@ -140,7 +158,7 @@ const genRouteDirSelectBtn = (matchedRoute) => {
 //fetch stops data from user choosed route direction
 const getStopId = async (matchedRoute, selectedRouteIndex) => {
   // Show loading animation
-  document.querySelector("#loading").style.display = "flex";
+  document.querySelector("#loading").style.display = "block";
 
   setTimeout(async () => {
     try {
@@ -226,9 +244,11 @@ const getETA = async (selectedDir, selectedRouteStop) => {
 
 //gen each stop button to show its estimated time of arrival in html
 const genShowETABtn = (Stops) => {
-  document.querySelector(
-    ".stopDisplay"
-  ).innerHTML += `<button class="collapsible stop timeline"><span>${Stops.stop}</span></button><div class="content" id="seq${Stops.seq}"></div>`;
+  document.querySelector(".stopDisplay").innerHTML += `
+  <button class="collapsible stop timeline">
+  <span>${Stops.stop}</span>
+  </button>
+  <div class="content" id="seq${Stops.seq}"></div>`;
   addEvent();
 };
 
@@ -290,31 +310,6 @@ document
       getInfo(event);
     }
   });
-
-//add route to fav
-// const toggleFav = (route) => {
-//   let setFavRoute = localStorage.getItem("favRoute") || [];
-
-//   if (setFavRoute.length > 0) {
-//     setFavRoute = JSON.parse(setFavRoute);
-//     if (setFavRoute.includes(route)) {
-//       if (setFavRoute.length === 1) {
-//         localStorage.removeItem("favRoute");
-//         document.querySelector(".favTitle").style.display = "none";
-//         return;
-//       } else {
-//         setFavRoute.splice(setFavRoute.indexOf(route), 1);
-//       }
-//     } else {
-//       setFavRoute.push(route);
-//     }
-//   } else {
-//     setFavRoute = [route];
-//   }
-//   let favStore = JSON.stringify(setFavRoute);
-//   localStorage.setItem("favRoute", favStore);
-// };
-
 const toggleFav = (route) => {
   let favRoute = JSON.parse(localStorage.getItem("favRoute") || "[]");
   if (favRoute.includes(route)) {
